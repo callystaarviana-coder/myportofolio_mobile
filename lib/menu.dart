@@ -51,16 +51,34 @@ class MyHomePage extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                  GridView.count(
-                    primary: false,
-                    physics: const NeverScrollableScrollPhysics(),
+                  Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20),
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    mainAxisExtent: 136,
-                    shrinkWrap: true,
-                    children: items.map((item) => ItemCard(item)).toList(),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        const spacing = 10.0;
+                        final textScale =
+                            MediaQuery.textScalerOf(context).scale(14) / 14;
+                        final minCardWidth = 84.0 * textScale;
+                        final columns =
+                            ((constraints.maxWidth + spacing) /
+                                    (minCardWidth + spacing))
+                                .floor()
+                                .clamp(1, items.length);
+                        final cardWidth =
+                            (constraints.maxWidth - spacing * (columns - 1)) /
+                            columns;
+
+                        return Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: spacing,
+                          runSpacing: spacing,
+                          children: [
+                            for (final item in items)
+                              SizedBox(width: cardWidth, child: ItemCard(item)),
+                          ],
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -132,19 +150,23 @@ class ItemCard extends StatelessWidget {
               ),
             );
         },
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(item.icon, size: 30, color: Colors.white),
-              const SizedBox(height: 6),
-              Text(
-                item.name,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white),
-              ),
-            ],
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 136),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(item.icon, size: 30, color: Colors.white),
+                const SizedBox(height: 6),
+                Text(
+                  item.name,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
           ),
         ),
       ),
