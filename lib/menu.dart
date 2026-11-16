@@ -35,12 +35,12 @@ class MyHomePage extends StatelessWidget {
                       ),
                       Expanded(
                         child: InfoCard(
-                          title: 'Nama',
+                          title: 'Name',
                           content: 'Callysta Arviana',
                         ),
                       ),
                       Expanded(
-                        child: InfoCard(title: 'Kelas', content: 'PBP A'),
+                        child: InfoCard(title: 'Class', content: 'PBP A'),
                       ),
                     ],
                   ),
