@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/screens/education_form.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 import 'package:myportofolio_mobile/widgets/project_card.dart';
@@ -15,6 +16,12 @@ class MyHomePage extends StatelessWidget {
       page: ProjectFormPage(),
     ),
     ItemHomepage('Logout', Icons.logout, Color(0xFFC62828)),
+    ItemHomepage(
+      'Tambah Edukasi',
+      Icons.school_outlined,
+      Color(0xFF6A1B9A),
+      page: EducationFormPage(),
+    ),
   ];
 
   @override
