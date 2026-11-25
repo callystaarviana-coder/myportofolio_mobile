@@ -1,7 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/screens/education_form.dart';
-import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
+import 'package:myportofolio_mobile/screens/project_list_screen.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
+import 'package:provider/provider.dart';
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({super.key});
@@ -9,6 +12,7 @@ class LeftDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final isLoggedIn = context.watch<AuthState>().isLoggedIn;
 
     return Drawer(
       child: ListView(
@@ -42,39 +46,59 @@ class LeftDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.home_outlined),
             title: const Text('Home'),
-            onTap: () => _goHome(context),
+            onTap: () {
+              final navigator = Navigator.of(context);
+              navigator.pop();
+              navigator.popUntil((route) => route.isFirst);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.folder_outlined),
+            title: const Text('Lihat Proyek'),
+            onTap: () => _openPage(context, const ProjectListScreen()),
           ),
           ListTile(
             leading: const Icon(Icons.add_circle_outline),
             title: const Text('Add Project'),
-            onTap: () => _replacePage(context, const ProjectFormPage()),
+            onTap: () => _openPage(
+              context,
+              const ProjectFormPage(),
+              requiresLogin: true,
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.school_outlined),
             title: const Text('Add Education'),
-            onTap: () => _replacePage(context, const EducationFormPage()),
+            onTap: () => _openPage(context, const EducationFormPage()),
+          ),
+          ListTile(
+            leading: Icon(isLoggedIn ? Icons.logout : Icons.login),
+            title: Text(isLoggedIn ? 'Logout' : 'Login'),
+            onTap: () {
+              final navigator = Navigator.of(context);
+              navigator.pop();
+              if (isLoggedIn) {
+                logoutWithFeedback(navigator.context);
+              } else {
+                ensureLoggedIn(navigator.context);
+              }
+            },
           ),
         ],
       ),
     );
   }
 
-  void _goHome(BuildContext context) {
-    // A form opened from a card already has Home at the bottom of the stack.
-    if (ModalRoute.of(context)?.isFirst == false) {
-      final navigator = Navigator.of(context);
-      navigator.pop();
-      navigator.popUntil((route) => route.isFirst);
-      return;
-    }
-    _replacePage(context, const MyHomePage());
-  }
-
-  void _replacePage(BuildContext context, Widget page) {
+  Future<void> _openPage(
+    BuildContext context,
+    Widget page, {
+    bool requiresLogin = false,
+  }) async {
     final navigator = Navigator.of(context);
     navigator.pop();
-    navigator.pushReplacement<void, void>(
-      MaterialPageRoute<void>(builder: (_) => page),
-    );
+    if (requiresLogin && !await ensureLoggedIn(navigator.context)) return;
+    if (!navigator.mounted) return;
+    navigator.popUntil((route) => route.isFirst);
+    navigator.push<void>(MaterialPageRoute<void>(builder: (_) => page));
   }
 }

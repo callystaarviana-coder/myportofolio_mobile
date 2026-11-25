@@ -1,12 +1,12 @@
 import 'package:material_ui/material_ui.dart';
 
 class ItemHomepage {
-  const ItemHomepage(this.name, this.icon, this.color, {this.page});
+  const ItemHomepage(this.name, this.icon, this.color, {required this.onTap});
 
   final String name;
   final IconData icon;
   final Color color;
-  final Widget? page;
+  final VoidCallback onTap;
 }
 
 class ItemCard extends StatelessWidget {
@@ -23,23 +23,7 @@ class ItemCard extends StatelessWidget {
       borderRadius: borderRadius,
       child: InkWell(
         borderRadius: borderRadius,
-        onTap: () {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text('Kamu telah menekan tombol ${item.name}!'),
-              ),
-            );
-
-          final page = item.page;
-          if (page != null) {
-            Navigator.push<void>(
-              context,
-              MaterialPageRoute<void>(builder: (_) => page),
-            );
-          }
-        },
+        onTap: item.onTap,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 136),
           child: Padding(

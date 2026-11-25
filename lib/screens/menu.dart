@@ -1,32 +1,53 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/screens/education_form.dart';
+import 'package:myportofolio_mobile/screens/login_screen.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
+import 'package:myportofolio_mobile/screens/project_list_screen.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 import 'package:myportofolio_mobile/widgets/project_card.dart';
+import 'package:provider/provider.dart';
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
 
-  static const items = [
-    ItemHomepage('Lihat Proyek', Icons.folder, Color(0xFF1565C0)),
-    ItemHomepage(
-      'Tambah Proyek',
-      Icons.add_circle,
-      Color(0xFF2E7D32),
-      page: ProjectFormPage(),
-    ),
-    ItemHomepage('Logout', Icons.logout, Color(0xFFC62828)),
-    ItemHomepage(
-      'Tambah Edukasi',
-      Icons.school_outlined,
-      Color(0xFF6A1B9A),
-      page: EducationFormPage(),
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final isLoggedIn = context.watch<AuthState>().isLoggedIn;
+    final items = [
+      ItemHomepage(
+        'Lihat Proyek',
+        Icons.folder,
+        const Color(0xFF1565C0),
+        onTap: () => _openPage(context, const ProjectListScreen()),
+      ),
+      ItemHomepage(
+        'Tambah Proyek',
+        Icons.add_circle,
+        const Color(0xFF2E7D32),
+        onTap: () async {
+          if (await ensureLoggedIn(context) && context.mounted) {
+            _openPage(context, const ProjectFormPage());
+          }
+        },
+      ),
+      ItemHomepage(
+        isLoggedIn ? 'Logout' : 'Login',
+        isLoggedIn ? Icons.logout : Icons.login,
+        const Color(0xFFC62828),
+        onTap: isLoggedIn
+            ? () => logoutWithFeedback(context)
+            : () => _openPage(context, const LoginScreen()),
+      ),
+      ItemHomepage(
+        'Tambah Edukasi',
+        Icons.school_outlined,
+        const Color(0xFF6A1B9A),
+        onTap: () => _openPage(context, const EducationFormPage()),
+      ),
+    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -102,6 +123,13 @@ class MyHomePage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _openPage(BuildContext context, Widget page) {
+    Navigator.push<void>(
+      context,
+      MaterialPageRoute<void>(builder: (_) => page),
     );
   }
 }
